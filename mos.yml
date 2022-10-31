@@ -1,0 +1,65 @@
+author: Liviu Nicolescu <nliviu@gmail.com>
+description: A Mongoose OS app for the LILYGO TTGO T-Call module
+version: 1.0
+
+libs_version: ${mos.version}
+modules_version: ${mos.version}
+mongoose_os_version: ${mos.version}
+
+manifest_version: 2017-09-29
+
+platforms: [esp32]
+
+# Optional. List of tags for online search.
+tags:
+  - c
+
+# List of files / directories with C sources. No slashes at the end of dir names.
+sources:
+  - src
+
+# List of dirs. Files from these dirs will be copied to the device filesystem
+filesystem:
+  - fs
+
+config_schema:
+  - ["debug.level", 2]
+  
+  - ["pppos.enable", true]
+  - ["pppos.connect_on_startup", false]
+  - ["pppos.uart_no", 1]
+  - ["pppos.rx_gpio", 26]
+  - ["pppos.tx_gpio", 27]
+  - ["pppos.rst_gpio", 5]
+
+  - ["modem.power.ctrl", "i", 23, {title: "Enable SIM800L's power supply GPIO"}]
+  - ["modem.power.on.pin", "i", 4, {title: "Power on the SIM800L GPIO."}] # PWRKEY
+  - ["modem.power.on.interval", "i", 1200, {title: "Power on interval."}]
+
+libs:
+  - origin: https://github.com/mongoose-os-libs/ca-bundle
+  - origin: https://github.com/mongoose-os-libs/ota-http-server
+  - origin: https://github.com/mongoose-os-libs/pppos
+  - origin: https://github.com/mongoose-os-libs/rpc-service-config
+  - origin: https://github.com/mongoose-os-libs/rpc-service-fs
+  - origin: https://github.com/mongoose-os-libs/rpc-service-ota
+  - origin: https://github.com/mongoose-os-libs/rpc-uart
+  - origin: https://github.com/mongoose-os-libs/rpc-ws
+  - origin: https://github.com/mongoose-os-libs/sntp
+
+build_vars:
+  OPERATOR: 0   # 0=ORANGE, 1=VODAFONE
+
+conds:
+  - when: build_vars.OPERATOR == "0"   # ORANGE
+    apply:
+      config_schema:
+        - ["pppos.apn", "net"]
+        - ["pppos.user", ""]
+        - ["pppos.pass", ""]
+  - when: build_vars.OPERATOR == "1"   # VODAFONE
+    apply:
+      config_schema:
+        - ["pppos.apn", "live.vodafone.com"]
+        - ["pppos.user", "live"]
+        - ["pppos.pass", "vodafone"]
